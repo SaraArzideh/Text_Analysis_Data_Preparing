@@ -1,6 +1,6 @@
 import nltk
 import pandas as pd
-from nltk.tokenize import word_tokenize, RegexpTokenizer
+from nltk.tokenize import word_tokenize, RegexpTokenizer, MWETokenizer
 from nltk.corpus import stopwords
 from collections import Counter, defaultdict
 import string
@@ -20,6 +20,9 @@ thesaurus_df = pd.read_excel(thesaurus_file)
 
 # Extract the relevant columns
 texts = df['Abstract'].astype(str) + ' ' + df['Title'].astype(str) + ' ' + df['Author Keywords'].astype(str)
+
+# Ensure that 'Author Keywords' are strings and not NaN
+df['Author Keywords'] = df['Author Keywords'].fillna('').astype(str)
 
 # Tokenization and counting with compound words
 tokenizer = RegexpTokenizer(r'\b\w[\w-]*\w\b') # Tokenizer that includes hyphens
@@ -63,6 +66,7 @@ cleaned_counts_df.to_excel('cleaned_word_counts.xlsx', index=False)
 co_occurrence_df = pd.DataFrame([{'Keyword': k, 'Co-occurring Word': ck, 'Frequency': cf} 
                                 for k, c in co_occurrences.items() 
                                 for ck, cf in c.items()])
-co_occurrence_df.to_excel('co_occurrence_data.xlsx', index=False)
+filtered_co_occurrence_df= co_occurrence_df[co_occurrence_df['Frequency']>=10]
+filtered_co_occurrence_df.to_csv('filtered_co_occurrence_data.csv', index=False)
 
 # Analyze relationships and categorize
